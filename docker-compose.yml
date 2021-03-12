@@ -1,0 +1,41 @@
+version: '3'
+services:
+  #PHP Service
+  app:
+    build:
+      context: ./images/php
+      dockerfile: Dockerfile
+    image: digitalocean.com/php
+    restart: unless-stopped
+    tty: true
+    working_dir: /var/www
+    volumes:
+       - ./app:/var/www:delegated
+       - ./images/php/local.ini:/usr/local/etc/php/conf.d/local.ini:delegated
+    networks:
+      - pldt-network
+
+  #Nginx Service
+  webserver:
+    build:
+      context: ./images/nginx
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./app:/var/www
+      - ./images/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - pldt-network
+
+#Docker Networks
+networks:
+  pldt-network:
+    driver: bridge
+#Volumes
+volumes:
+  dbdata:
+    driver: local
